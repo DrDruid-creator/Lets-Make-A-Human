@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lets make a Human</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-2: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --yellow: #facc15;
+      --purple: #a855f7;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 12px 28px rgba(0,0,0,0.28);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px 20px 90px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(56,189,248,0.12), rgba(168,85,247,0.12));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.1;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 860px;
+      line-height: 1.5;
+    }
+
+    .top-controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin: 18px 0 24px;
+    }
+
+    .toggle-card,
+    .bottom-actions-card,
+    .family-summary-card,
+    .explain-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .toggle-row,
+    .bottom-actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-row strong,
+    .bottom-actions-row strong,
+    .family-summary-card h3 {
+      display: block;
+      margin: 0 0 4px;
+      font-size: 17px;
+    }
+
+    .toggle-row span,
+    .bottom-actions-row span,
+    .family-summary-card p,
+    .family-summary-card li,
+    .mini-box p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .switch {
+      position: relative;
+      width: 66px;
+      height: 38px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      background: #475569;
+      border-radius: 99px;
+      transition: 0.25s ease;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      left: 5px;
+      top: 5px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.25s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--accent);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(28px);
+    }
+
+    .primary-actions,
+    .bottom-actions-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      box-shadow: var(--shadow);
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .btn-main {
+      background: linear-gradient(135deg, var(--accent), #818cf8);
+      color: #08111f;
+    }
+
+    .btn-alt {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .parents-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .person-card,
+    .child-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .card-head h2,
+    .card-head h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .pill {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .identity {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .avatar-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 92px;
+      height: 92px;
+      position: relative;
+    }
+
+    .avatar .hair {
+      position: absolute;
+      width: 72px;
+      height: 38px;
+      top: 10px;
+      left: 10px;
+      border-radius: 40px 40px 18px 18px;
+      z-index: 2;
+    }
+
+    .avatar .face {
+      position: absolute;
+      width: 62px;
+      height: 72px;
+      top: 18px;
+      left: 15px;
+      border-radius: 30px 30px 28px 28px;
+      z-index: 1;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.08);
+    }
+
+    .avatar .eyes {
+      position: absolute;
+      width: 40px;
+      top: 44px;
+      left: 26px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 3;
+    }
+
+    .avatar .eye {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.35);
+    }
+
+    .avatar .body {
+      position: absolute;
+      width: 70px;
+      height: 34px;
+      bottom: 0;
+      left: 11px;
+      border-radius: 20px 20px 8px 8px;
+      background: rgba(255,255,255,0.12);
+    }
+
+    .identity-meta h4 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+
+    .identity-meta p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .section {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .section:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .section h5 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      color: #f8fafc;
+    }
+
+    .trait-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .trait {
+      display: grid;
+      grid-template-columns: minmax(120px, 160px) 1fr;
+      gap: 10px;
+      align-items: start;
+      font-size: 14px;
+    }
+
+    .trait .label {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .trait .value {
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .summary-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tag.inherited { background: rgba(56,189,248,0.18); color: #bae6fd; }
+    .tag.influenced { background: rgba(168,85,247,0.18); color: #e9d5ff; }
+    .tag.emergent { background: rgba(250,204,21,0.18); color: #fde68a; }
+
+    .child-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .child-hero {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .child-avatar {
+      transform: scale(1.15);
+      transform-origin: center;
+    }
+
+    .child-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .origin-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .origin-item + .origin-item {
+      margin-top: 10px;
+    }
+
+    .origin-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .origin-top strong {
+      font-size: 14px;
+    }
+
+    .origin-value {
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .origin-reason {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .child-block {
+      margin-bottom: 28px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .child-block:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini-box {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .mini-box h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .family-summary-card ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    .footer-mark {
+      position: fixed;
+      right: 12px;
+      bottom: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.18);
+      user-select: none;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      .child-layout,
+      .parents-grid,
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .top-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .primary-actions,
+      .bottom-actions-buttons {
+        justify-content: stretch;
+      }
+
+      .primary-actions button,
+      .bottom-actions-buttons button {
+        flex: 1 1 220px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap { padding: 14px 14px 90px; }
+      .identity,
+      .child-hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .avatar-wrap {
+        justify-content: center;
+      }
+      .trait {
+        grid-template-columns: 1fr;
+      }
+      .card-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .toggle-row,
+      .bottom-actions-row {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Lets make a Human</h1>
+      <p>
+        Explore how inherited biology, complex biological influence, social upbringing, and individual variation can all shape one person differently.
+      </p>
+    </section>
+
+    <div class="top-controls">
+      <div class="toggle-card">
+        <div class="toggle-row">
+          <div>
+            <strong>Include genetic contributors</strong>
+            <span>Off uses Father and Mother only. On adds separate genetic contributors while Father and Mother remain the contributing parents.</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="geneticContributorToggle" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="primary-actions">
+        <button class="btn-alt" id="resetTopBtn">Reset / Reload</button>
+        <button class="btn-main" id="makeHumanBtn">Make a Human</button>
+      </div>
+    </div>
+
+    <section class="grid parents-grid" id="parentsArea"></section>
+
+    <section class="child-card hidden" id="childSection">
+      <div class="card-head">
+        <h2>Created Humans</h2>
+        <span class="pill" id="childModePill">Contributing parents</span>
+      </div>
+      <div class="card-body" id="childBody"></div>
+    </section>
+
+    <section class="info-card" style="margin-top: 18px;">
+      <div class="card-head">
+        <h3>What the colours mean</h3>
+        <span class="pill">Simple visual guide</span>
+      </div>
+      <div class="card-body">
+        <div class="summary-row" style="margin-top:0; margin-bottom:18px;">
+          <span class="tag inherited">Inherited</span>
+          <span class="tag influenced">Influenced</span>
+          <span class="tag emergent">Emergent</span>
+        </div>
+        <div class="info-grid">
+          <div class="mini-box">
+            <h4>Inherited</h4>
+            <p>Traits that follow more direct biological inheritance patterns, such as blood type, eye colour, hair colour, skin tone range, and height tendency.</p>
+          </div>
+          <div class="mini-box">
+            <h4>Influenced</h4>
+            <p>Traits where biology can increase the likelihood, but not guarantee the outcome, such as autism, ADHD, sexuality, and gender identity.</p>
+          </div>
+          <div class="mini-box">
+            <h4>Emergent</h4>
+            <p>Traits shaped by individual variation, lived experience, and environment, such as beliefs, habits, and interests.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="family-summary-card" style="margin-top: 18px;">
+      <h3>Family Summary</h3>
+      <div id="familySummaryBody"></div>
+    </section>
+
+    <section class="bottom-actions-card" style="margin-top: 18px;">
+      <div class="bottom-actions-row">
+        <div>
+          <strong>Reset or start again</strong>
+          <span>Clear all siblings and regenerate the family from scratch.</span>
+        </div>
+        <div class="bottom-actions-buttons">
+          <button class="btn-alt" id="resetBottomBtn">Reset / Reload</button>
+          <button class="btn-main" id="makeHumanBottomBtn">Make a Human</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="footer-mark">Professor Michael Coyle 2026</div>
+
+  <script>
+    const geneticPools = {
+      skinTone: [
+        { name: 'Very fair', value: 1, color: '#f5d7c6' },
+        { name: 'Fair', value: 2, color: '#edc9af' },
+        { name: 'Light', value: 3, color: '#d9a77c' },
+        { name: 'Medium', value: 4, color: '#b7794f' },
+        { name: 'Tan', value: 5, color: '#8b5a3c' },
+        { name: 'Deep', value: 6, color: '#5f3b24' }
+      ],
+      hairColor: [
+        { name: 'Black', value: 1, color: '#1f2937' },
+        { name: 'Dark brown', value: 2, color: '#3f2a1d' },
+        { name: 'Brown', value: 3, color: '#6b4423' },
+        { name: 'Light brown', value: 4, color: '#8b6a48' },
+        { name: 'Blonde', value: 5, color: '#e7c76a' },
+        { name: 'Red', value: 6, color: '#b45309' }
+      ],
+      eyeColor: [
+        { name: 'Brown', weight: 36, color: '#5a3a22' },
+        { name: 'Hazel', weight: 18, color: '#6d5f29' },
+        { name: 'Green', weight: 12, color: '#4d7c0f' },
+        { name: 'Blue', weight: 12, color: '#3b82f6' },
+        { name: 'Grey', weight: 5, color: '#94a3b8' }
+      ],
+      bloodType: [
+        { phenotype: 'A', genotypes: ['AA', 'AO'] },
+        { phenotype: 'B', genotypes: ['BB', 'BO'] },
+        { phenotype: 'AB', genotypes: ['AB'] },
+        { phenotype: 'O', genotypes: ['OO'] }
+      ],
+      heightCm: {
+        male: [160, 205],
+        female: [148, 190],
+        neutral: [150, 198]
+      }
+    };
+
+    const socialPools = {
+      personalities: ['Warm', 'Reserved', 'Playful', 'Calm', 'Driven', 'Analytical', 'Gentle', 'Outgoing', 'Reflective', 'Bold'],
+      beliefs: ['Secular', 'Spiritual', 'Traditional', 'Progressive', 'Community focused', 'Independent minded'],
+      habits: ['Early riser', 'Night owl', 'Routine driven', 'Impulsive', 'Highly organised', 'Relaxed'],
+      interests: ['Music', 'Sport', 'Books', 'Technology', 'Nature', 'Art', 'Gaming', 'Animals', 'Travel', 'Cooking']
+    };
+
+    const complexTraits = {
+      autism: { label: 'Autism', baseChance: 0.08, parentBoost: 0.18, bothBoost: 0.12 },
+      adhd: { label: 'ADHD', baseChance: 0.10, parentBoost: 0.20, bothBoost: 0.12 },
+      nonBinary: { label: 'Non binary identity', baseChance: 0.03, parentBoost: 0.05, bothBoost: 0.03 }
+    };
+
+    const sexualityOptions = [
+      'Heterosexual',
+      'Bisexual',
+      'Homosexual',
+      'Asexual',
+      'Pansexual'
+    ];
+
+    const app = {
+      useGeneticContributors: false,
+      parentLetterIndex: 0,
+      allPeopleEverCreated: [],
+      father: null,
+      mother: null,
+      donorFather: null,
+      donorMother: null,
+      childHistory: [],
+      siblingCounter: 0
+    };
+
+    const geneticContributorToggle = document.getElementById('geneticContributorToggle');
+    const parentsArea = document.getElementById('parentsArea');
+    const childSection = document.getElementById('childSection');
+    const childBody = document.getElementById('childBody');
+    const childModePill = document.getElementById('childModePill');
+    const familySummaryBody = document.getElementById('familySummaryBody');
+
+    function choice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function weightedChoice(arr) {
+      const total = arr.reduce((sum, item) => sum + item.weight, 0);
+      let roll = Math.random() * total;
+      for (const item of arr) {
+        roll -= item.weight;
+        if (roll <= 0) return item;
+      }
+      return arr[arr.length - 1];
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function clamp(num, min, max) {
+      return Math.min(Math.max(num, min), max);
+    }
+
+    function nextLetter() {
+      const letter = String.fromCharCode(65 + app.parentLetterIndex);
+      app.parentLetterIndex += 1;
+      return letter;
+    }
+
+    function genotypeFromPhenotype(phenotype) {
+      const found = geneticPools.bloodType.find(b => b.phenotype === phenotype);
+      return choice(found.genotypes);
+    }
+
+    function randomHeight(role) {
+      const range = geneticPools.heightCm[role] || geneticPools.heightCm.neutral;
+      return rand(range[0], range[1]);
+    }
+
+    function generateSocialTraits() {
+      return {
+        personality: choice(socialPools.personalities),
+        belief: choice(socialPools.beliefs),
+        habit: choice(socialPools.habits),
+        interest: choice(socialPools.interests)
+      };
+    }
+
+    function randomSexuality() {
+      return choice(sexualityOptions);
+    }
+
+    function randomRaisingParentGender() {
+      return choice(['Male', 'Female', 'Non-binary']);
+    }
+
+    function randomRaisingParentAvatarHint() {
+      return choice(['male', 'female']);
+    }
+
+    function sexualityAcceptsTarget(sexuality, selfGender, targetGender) {
+      if (sexuality === 'Bisexual' || sexuality === 'Pansexual') return true;
+      if (sexuality === 'Asexual') return false;
+      if (sexuality === 'Heterosexual') return selfGender !== targetGender;
+      if (sexuality === 'Homosexual') return selfGender === targetGender;
+      return false;
+    }
+
+    function isCompatiblePair(personA, personB) {
+      if (personA.complex.sexuality === 'Asexual' || personB.complex.sexuality === 'Asexual') {
+        return personA.complex.sexuality === 'Asexual' && personB.complex.sexuality === 'Asexual';
+      }
+
+      return sexualityAcceptsTarget(personA.complex.sexuality, personA.gender, personB.gender)
+        && sexualityAcceptsTarget(personB.complex.sexuality, personB.gender, personA.gender);
+    }
+
+    function createCompatibleRaisingParents() {
+      let parentA;
+      let parentB;
+      const startIndex = app.parentLetterIndex;
+      const startPeopleCount = app.allPeopleEverCreated.length;
+
+      do {
+        app.parentLetterIndex = startIndex;
+        app.allPeopleEverCreated.length = startPeopleCount;
+
+        parentA = createPerson({
+          role: 'father',
+          label: 'Raising Parent 1',
+          kind: 'Raising parent',
+          avatarHint: randomRaisingParentAvatarHint(),
+          gender: randomRaisingParentGender()
+        });
+        parentB = createPerson({
+          role: 'mother',
+          label: 'Raising Parent 2',
+          kind: 'Raising parent',
+          avatarHint: randomRaisingParentAvatarHint(),
+          gender: randomRaisingParentGender()
+        });
+        parentA.complex.sexuality = randomSexuality();
+        parentB.complex.sexuality = randomSexuality();
+      } while (!isCompatiblePair(parentA, parentB));
+
+      return [parentA, parentB];
+    }
+
+    function buildComplexTraits() {
+      return {
+        sexuality: randomSexuality(),
+        autism: Math.random() < 0.10,
+        adhd: Math.random() < 0.12,
+        nonBinary: Math.random() < 0.04
+      };
+    }
+
+    function influencedChildSexuality(geneticA, geneticB) {
+      const weights = sexualityOptions.map(option => ({ label: option, weight: 20 }));
+      const first = weights.find(item => item.label === geneticA.complex.sexuality);
+      const second = weights.find(item => item.label === geneticB.complex.sexuality);
+      if (first) first.weight += 3;
+      if (second) second.weight += 3;
+      if (geneticA.complex.sexuality === geneticB.complex.sexuality && first) first.weight += 2;
+      return weightedChoice(weights).label;
+    }
+
+    function createPerson(config) {
+      const gender = config.gender || (config.avatarHint === 'male' ? 'Male' : config.avatarHint === 'female' ? 'Female' : choice(['Male', 'Female']));
+      const person = {
+        id: `${config.role}-${Math.random().toString(36).slice(2, 9)}`,
+        letter: nextLetter(),
+        role: config.role,
+        label: config.label,
+        kind: config.kind,
+        avatarHint: config.avatarHint,
+        gender,
+        genetics: {
+          skinTone: choice(geneticPools.skinTone),
+          hairColor: choice(geneticPools.hairColor),
+          eyeColor: weightedChoice(geneticPools.eyeColor),
+          bloodType: choice(geneticPools.bloodType).phenotype,
+          bloodGenotype: null,
+          heightCm: randomHeight(config.avatarHint)
+        },
+        complex: buildComplexTraits(),
+        social: generateSocialTraits()
+      };
+      person.genetics.bloodGenotype = genotypeFromPhenotype(person.genetics.bloodType);
+      app.allPeopleEverCreated.push(person);
+      return person;
+    }
+
+    function createBaseFamily() {
+      if (app.useGeneticContributors) {
+        const [raisingParentA, raisingParentB] = createCompatibleRaisingParents();
+        app.father = raisingParentA;
+        app.mother = raisingParentB;
+        app.donorFather = createPerson({ role: 'donorFather', label: 'Genetic Contributor 1', kind: 'Genetic contributor', avatarHint: 'male', gender: 'Male' });
+        app.donorMother = createPerson({ role: 'donorMother', label: 'Genetic Contributor 2', kind: 'Genetic contributor', avatarHint: 'female', gender: 'Female' });
+      } else {
+        app.father = createPerson({ role: 'father', label: 'Father', kind: 'Contributing parent', avatarHint: 'male', gender: 'Male' });
+        app.mother = createPerson({ role: 'mother', label: 'Mother', kind: 'Contributing parent', avatarHint: 'female', gender: 'Female' });
+        app.father.complex.sexuality = choice(['Heterosexual', 'Bisexual']);
+        app.mother.complex.sexuality = choice(['Heterosexual', 'Bisexual']);
+        app.donorFather = null;
+        app.donorMother = null;
+      }
+    }
+
+    function rerollPersonGenetics(person) {
+      person.genetics.skinTone = choice(geneticPools.skinTone);
+      person.genetics.hairColor = choice(geneticPools.hairColor);
+      person.genetics.eyeColor = weightedChoice(geneticPools.eyeColor);
+      person.genetics.bloodType = choice(geneticPools.bloodType).phenotype;
+      person.genetics.bloodGenotype = genotypeFromPhenotype(person.genetics.bloodType);
+      person.genetics.heightCm = randomHeight(person.avatarHint);
+    }
+
+    function rerollPersonSocial(person) {
+      person.social = generateSocialTraits();
+    }
+
+    function personAvatarHTML(person) {
+      const hair = person.genetics.hairColor.color;
+      const skin = person.genetics.skinTone.color;
+      const eye = person.genetics.eyeColor.color;
+      return `
+        <div class="avatar">
+          <div class="hair" style="background:${hair}"></div>
+          <div class="face" style="background:${skin}"></div>
+          <div class="eyes">
+            <span class="eye" style="background:${eye}"></span>
+            <span class="eye" style="background:${eye}"></span>
+          </div>
+          <div class="body"></div>
+        </div>
+      `;
+    }
+
+    function renderTraitRows(rows) {
+      return rows.map(row => `
+        <div class="trait">
+          <div class="label">${row.label}</div>
+          <div class="value">${row.value}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderPersonCard(person) {
+      const topTitle = `Parent ${person.letter}`;
+      const description = person.kind === 'Genetic contributor'
+        ? 'Shapes inherited biology and complex biological influence.'
+        : person.kind === 'Raising parent'
+          ? 'Shapes social upbringing and learned environment.'
+          : 'Shapes social upbringing and learned environment, and also shapes biology when no genetic contributors are included.';
+
+      if (person.kind === 'Raising parent') {
+        return `
+          <article class="person-card">
+            <div class="card-head">
+              <h2>${topTitle}</h2>
+              <span class="pill">${person.kind}</span>
+            </div>
+            <div class="card-body">
+              <div class="identity">
+                <div class="avatar-wrap">${personAvatarHTML(person)}</div>
+                <div class="identity-meta">
+                  <h4>${person.label}, ${person.letter}</h4>
+                  <p>${description}</p>
+                </div>
+              </div>
+
+              <div class="control-row">
+                <button class="btn-alt" onclick="appActions.rerollSocial('${person.id}')">Randomise social</button>
+              </div>
+
+              <div class="section">
+                <h5>Profile</h5>
+                <div class="trait-list">
+                  ${renderTraitRows([
+                      { label: 'Gender', value: person.gender },
+                    { label: 'Sexuality', value: person.complex.sexuality }
+                  ])}
+                </div>
+              </div>
+
+              <div class="section">
+                <h5>Social traits</h5>
+                <div class="trait-list">
+                  ${renderTraitRows([
+                    { label: 'Personality', value: person.social.personality },
+                    { label: 'Belief style', value: person.social.belief },
+                    { label: 'Habit style', value: person.social.habit },
+                    { label: 'Interest bias', value: person.social.interest }
+                  ])}
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }
+
+      const complexRows = [];
+      complexRows.push({ label: 'Sexuality', value: `${person.complex.sexuality}, may have biological influence but not direct inheritance certainty` });
+      if (person.complex.autism) complexRows.push({ label: 'Autism', value: 'Present, may increase likelihood in a child' });
+      if (person.complex.adhd) complexRows.push({ label: 'ADHD', value: 'Present, may increase likelihood in a child' });
+      if (person.complex.nonBinary) complexRows.push({ label: 'Gender identity', value: 'Non binary identity present, may influence likelihood but not determine a child identity' });
+      if (complexRows.length === 1) {
+        complexRows.push({ label: 'Other', value: 'No additional listed complex biological influences are present' });
+      }
+
+      return `
+        <article class="person-card">
+          <div class="card-head">
+            <h2>${topTitle}</h2>
+            <span class="pill">${person.kind}</span>
+          </div>
+          <div class="card-body">
+            <div class="identity">
+              <div class="avatar-wrap">${personAvatarHTML(person)}</div>
+              <div class="identity-meta">
+                <h4>${person.label}, ${person.letter}</h4>
+                <p>${description}</p>
+              </div>
+            </div>
+
+            <div class="control-row">
+              <button class="btn-alt" onclick="appActions.rerollGenetics('${person.id}')">Randomise genetics</button>
+              <button class="btn-alt" onclick="appActions.rerollSocial('${person.id}')">Randomise social</button>
+            </div>
+
+            <div class="section">
+              <h5>Profile</h5>
+              <div class="trait-list">
+                ${renderTraitRows([
+                  { label: 'Gender', value: person.gender },
+                  { label: 'Skin tone', value: person.genetics.skinTone.name },
+                  { label: 'Hair colour', value: person.genetics.hairColor.name },
+                  { label: 'Eye colour', value: person.genetics.eyeColor.name },
+                  { label: 'Blood type', value: person.genetics.bloodType },
+                  { label: 'Height', value: `${person.genetics.heightCm} cm` }
+                ])}
+              </div>
+            </div>
+
+            <div class="section">
+              <h5>Complex biological influence</h5>
+              <div class="trait-list">
+                ${renderTraitRows(complexRows)}
+              </div>
+            </div>
+
+            <div class="section">
+              <h5>Social traits</h5>
+              <div class="trait-list">
+                ${renderTraitRows([
+                  { label: 'Personality', value: person.social.personality },
+                  { label: 'Belief style', value: person.social.belief },
+                  { label: 'Habit style', value: person.social.habit },
+                  { label: 'Interest bias', value: person.social.interest }
+                ])}
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderParents() {
+      const visiblePeople = app.useGeneticContributors
+        ? [app.father, app.mother, app.donorFather, app.donorMother].filter(Boolean)
+        : [app.father, app.mother].filter(Boolean);
+
+      parentsArea.innerHTML = visiblePeople.map(renderPersonCard).join('');
+    }
+
+    function childBloodType(genotypeA, genotypeB) {
+      const alleleA = choice(genotypeA.split(''));
+      const alleleB = choice(genotypeB.split(''));
+      const result = [alleleA, alleleB].sort().join('');
+      if (result.includes('A') && result.includes('B')) return { phenotype: 'AB', genotype: 'AB' };
+      if (result.includes('A')) return { phenotype: 'A', genotype: result };
+      if (result.includes('B')) return { phenotype: 'B', genotype: result };
+      return { phenotype: 'O', genotype: 'OO' };
+    }
+
+    function inheritBlendValue(personA, personB, key) {
+      const a = personA.genetics[key].value;
+      const b = personB.genetics[key].value;
+      const avg = (a + b) / 2;
+      const min = Math.min(a, b) - 1;
+      const max = Math.max(a, b) + 1;
+      const rolled = Math.round(avg + (Math.random() * 2 - 1));
+      const finalValue = clamp(rolled, clamp(min, 1, 999), clamp(max, 1, 999));
+      const pool = geneticPools[key];
+      return pool.find(item => item.value === finalValue) || pool.find(item => item.value === Math.round(avg)) || pool[0];
+    }
+
+    function inheritEyeColor(personA, personB) {
+      const options = [
+        { item: personA.genetics.eyeColor, weight: 40 },
+        { item: personB.genetics.eyeColor, weight: 40 }
+      ];
+      const rarePool = geneticPools.eyeColor.filter(c => c.name !== personA.genetics.eyeColor.name && c.name !== personB.genetics.eyeColor.name);
+      if (rarePool.length) options.push({ item: choice(rarePool), weight: 20 });
+      const selected = weightedChoice(options.map(x => ({ ...x.item, weight: x.weight })));
+      return geneticPools.eyeColor.find(c => c.name === selected.name);
+    }
+
+    function inheritHeight(personA, personB) {
+      const midpoint = Math.round((personA.genetics.heightCm + personB.genetics.heightCm) / 2);
+      return clamp(midpoint + rand(-10, 10), 140, 210);
+    }
+
+    function influencedChance(base, presentCount, config) {
+      let chance = base;
+      if (presentCount >= 1) chance += config.parentBoost;
+      if (presentCount >= 2) chance += config.bothBoost;
+      return clamp(chance, 0, 0.95);
+    }
+
+    function buildInfluencedTrait(presentCount, config) {
+      const chance = influencedChance(config.baseChance, presentCount, config);
+      return { present: Math.random() < chance };
+    }
+
+    function sourceName(person) {
+      return `${person.label}, ${person.letter}`;
+    }
+
+    function buildChild() {
+      const geneticA = app.useGeneticContributors ? app.donorFather : app.father;
+      const geneticB = app.useGeneticContributors ? app.donorMother : app.mother;
+      const socialA = app.father;
+      const socialB = app.mother;
+
+      const skinTone = inheritBlendValue(geneticA, geneticB, 'skinTone');
+      const hairColor = inheritBlendValue(geneticA, geneticB, 'hairColor');
+      const eyeColor = inheritEyeColor(geneticA, geneticB);
+      const blood = childBloodType(geneticA.genetics.bloodGenotype, geneticB.genetics.bloodGenotype);
+      const heightCm = inheritHeight(geneticA, geneticB);
+
+      const autismPresentCount = Number(geneticA.complex.autism) + Number(geneticB.complex.autism);
+      const adhdPresentCount = Number(geneticA.complex.adhd) + Number(geneticB.complex.adhd);
+      const nbPresentCount = Number(geneticA.complex.nonBinary) + Number(geneticB.complex.nonBinary);
+
+      const autism = buildInfluencedTrait(autismPresentCount, complexTraits.autism);
+      const adhd = buildInfluencedTrait(adhdPresentCount, complexTraits.adhd);
+      const nonBinary = buildInfluencedTrait(nbPresentCount, complexTraits.nonBinary);
+
+      const sexuality = influencedChildSexuality(geneticA, geneticB);
+
+      const socialMix = {
+        personality: Math.random() < 0.45 ? socialA.social.personality : Math.random() < 0.82 ? socialB.social.personality : choice(socialPools.personalities),
+        belief: Math.random() < 0.45 ? socialA.social.belief : Math.random() < 0.82 ? socialB.social.belief : choice(socialPools.beliefs),
+        habit: Math.random() < 0.45 ? socialA.social.habit : Math.random() < 0.82 ? socialB.social.habit : choice(socialPools.habits),
+        interest: Math.random() < 0.45 ? socialA.social.interest : Math.random() < 0.82 ? socialB.social.interest : choice(socialPools.interests)
+      };
+
+      const origins = [
+        {
+          label: 'Skin tone',
+          value: skinTone.name,
+          type: 'inherited',
+          reason: `Blended from ${sourceName(geneticA)} and ${sourceName(geneticB)}.`
+        },
+        {
+          label: 'Hair colour',
+          value: hairColor.name,
+          type: 'inherited',
+          reason: `Inherited within the range shown by ${sourceName(geneticA)} and ${sourceName(geneticB)}.`
+        },
+        {
+          label: 'Eye colour',
+          value: eyeColor.name,
+          type: 'inherited',
+          reason: `Weighted toward contributor traits with room for variation.`
+        },
+        {
+          label: 'Blood type',
+          value: blood.phenotype,
+          type: 'inherited',
+          reason: `Generated from allele combination between ${sourceName(geneticA)} and ${sourceName(geneticB)}.`
+        },
+        {
+          label: 'Height tendency',
+          value: `${heightCm} cm`,
+          type: 'inherited',
+          reason: `Built from the contributor midpoint with normal variation.`
+        },
+        {
+          label: 'Sexuality',
+          value: sexuality,
+          type: 'influenced',
+          reason: `Not directly inherited, but generated with slight biological influence from the genetic contributors.`
+        }
+      ];
+
+      if (autism.present) {
+        origins.push({
+          label: 'Autism',
+          value: 'Present',
+          type: 'influenced',
+          reason: autismPresentCount > 0 ? `Likelihood increased because at least one genetic contributor has this trait.` : `Generated from base likelihood without direct contributor presence.`
+        });
+      }
+
+      if (adhd.present) {
+        origins.push({
+          label: 'ADHD',
+          value: 'Present',
+          type: 'influenced',
+          reason: adhdPresentCount > 0 ? `Likelihood increased because at least one genetic contributor has this trait.` : `Generated from base likelihood without direct contributor presence.`
+        });
+      }
+
+      if (nonBinary.present) {
+        origins.push({
+          label: 'Non binary identity',
+          value: 'Present',
+          type: 'influenced',
+          reason: nbPresentCount > 0 ? `Likelihood increased because at least one genetic contributor has this trait.` : `Generated from base likelihood without direct contributor presence.`
+        });
+      }
+
+      origins.push(
+        {
+          label: 'Personality expression',
+          value: socialMix.personality,
+          type: 'emergent',
+          reason: `Shaped by the environment created by ${sourceName(socialA)} and ${sourceName(socialB)}.`
+        },
+        {
+          label: 'Belief style',
+          value: socialMix.belief,
+          type: 'emergent',
+          reason: `Influenced by ${sourceName(socialA)} and ${sourceName(socialB)}, but not fixed by them.`
+        },
+        {
+          label: 'Habit style',
+          value: socialMix.habit,
+          type: 'emergent',
+          reason: `Built from the home environment and individual expression.`
+        },
+        {
+          label: 'Interest bias',
+          value: socialMix.interest,
+          type: 'emergent',
+          reason: `Influenced by Father and Mother, but still independent enough to vary.`
+        }
+      );
+
+      return {
+        id: `child-${Math.random().toString(36).slice(2, 9)}`,
+        siblingNumber: ++app.siblingCounter,
+        parentLettersUsed: app.useGeneticContributors
+          ? [app.father.letter, app.mother.letter, app.donorFather.letter, app.donorMother.letter]
+          : [app.father.letter, app.mother.letter],
+        avatar: { skinTone, hairColor, eyeColor },
+        summary: {
+          inherited: 5,
+          influenced: origins.filter(item => item.type === 'influenced').length,
+          emergent: 4
+        },
+        genetic: { skinTone, hairColor, eyeColor, blood, heightCm },
+        complex: {
+          sexuality: sexuality,
+          autism: autism.present,
+          adhd: adhd.present,
+          nonBinary: nonBinary.present
+        },
+        social: socialMix,
+        sources: {
+          geneticA: sourceName(geneticA),
+          geneticB: sourceName(geneticB),
+          socialA: sourceName(socialA),
+          socialB: sourceName(socialB)
+        },
+        origins
+      };
+    }
+
+    function childAvatarHTML(child) {
+      return `
+        <div class="avatar child-avatar">
+          <div class="hair" style="background:${child.avatar.hairColor.color}"></div>
+          <div class="face" style="background:${child.avatar.skinTone.color}"></div>
+          <div class="eyes">
+            <span class="eye" style="background:${child.avatar.eyeColor.color}"></span>
+            <span class="eye" style="background:${child.avatar.eyeColor.color}"></span>
+          </div>
+          <div class="body"></div>
+        </div>
+      `;
+    }
+
+    function tagLabel(type) {
+      if (type === 'inherited') return 'Inherited';
+      if (type === 'influenced') return 'Influenced';
+      return 'Emergent';
+    }
+
+    function renderChildren() {
+      if (!app.childHistory.length) {
+        childSection.classList.add('hidden');
+        return;
+      }
+
+      childSection.classList.remove('hidden');
+      childModePill.textContent = app.useGeneticContributors ? 'Contributing parents + genetic contributors' : 'Contributing parents';
+
+      childBody.innerHTML = app.childHistory.map((child, index) => `
+        <div class="child-block">
+          <div class="child-layout">
+            <div>
+              <div class="child-hero">
+                <div class="avatar-wrap">${childAvatarHTML(child)}</div>
+                <div>
+                  <h3 style="margin:0 0 8px; font-size:26px;">Sibling ${child.siblingNumber}</h3>
+                  <p style="margin:0; color:var(--muted); line-height:1.55;">
+                    This result shows how biology, social environment, and individual variation all combine differently in each person.
+                  </p>
+                  <div class="summary-row">
+                    <span class="tag inherited">Inherited: ${child.summary.inherited}</span>
+                    <span class="tag influenced">Influenced: ${child.summary.influenced}</span>
+                    <span class="tag emergent">Emergent: ${child.summary.emergent}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                ${child.origins.map(item => `
+                  <div class="origin-item">
+                    <div class="origin-top">
+                      <strong>${item.label}</strong>
+                      <span class="tag ${item.type}">${tagLabel(item.type)}</span>
+                    </div>
+                    <div class="origin-value">${item.value}</div>
+                    <div class="origin-reason">${item.reason}</div>
+                  </div>
+                `).join('')}
+              </div>
+
+              ${index === 0 ? `
+              <div class="child-actions">
+                <button class="btn-main" onclick="appActions.makeSiblingSameSetup()">Make a sibling (same setup)</button>
+                <button class="btn-alt" onclick="appActions.makeSiblingNewMother()">${app.useGeneticContributors ? 'Make a sibling (new raising parent 2)' : 'Make a sibling (new mother)'}</button>
+                <button class="btn-alt" onclick="appActions.makeSiblingNewFather()">${app.useGeneticContributors ? 'Make a sibling (new raising parent 1)' : 'Make a sibling (new father)'}</button>
+              </div>
+              ` : ''}
+            </div>
+
+            <div>
+              <div class="origin-item">
+                <div class="origin-top">
+                  <strong>Why this human turned out this way</strong>
+                  <span>${app.useGeneticContributors ? 'Contributing parents + genetic contributors' : 'Contributing parents'}</span>
+                </div>
+                <div class="origin-reason" style="font-size:14px; color:var(--text);">
+                  Inherited traits came from ${child.sources.geneticA} and ${child.sources.geneticB}. Social shaping came from ${child.sources.socialA} and ${child.sources.socialB}. The final result still includes independent variation.
+                </div>
+              </div>
+
+              <div class="origin-item">
+                <div class="origin-top">
+                  <strong>Genetic sources</strong>
+                </div>
+                <div class="trait-list">
+                  ${renderTraitRows([
+                    { label: 'Source A', value: child.sources.geneticA },
+                    { label: 'Source B', value: child.sources.geneticB }
+                  ])}
+                </div>
+              </div>
+
+              <div class="origin-item">
+                <div class="origin-top">
+                  <strong>Social sources</strong>
+                </div>
+                <div class="trait-list">
+                  ${renderTraitRows([
+                    { label: 'Source A', value: child.sources.socialA },
+                    { label: 'Source B', value: child.sources.socialB }
+                  ])}
+                </div>
+              </div>
+
+              <div class="origin-item">
+                <div class="origin-top">
+                  <strong>Letters used</strong>
+                </div>
+                <div class="origin-reason" style="font-size:14px; color:var(--text);">
+                  ${child.parentLettersUsed.join(', ')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderFamilySummary() {
+      const totalPeople = app.allPeopleEverCreated.length;
+      const totalFathersEver = app.allPeopleEverCreated.filter(p => p.label === 'Father').length;
+      const totalMothersEver = app.allPeopleEverCreated.filter(p => p.label === 'Mother').length;
+      const totalGeneticContributorsEver = app.allPeopleEverCreated.filter(p => p.kind === 'Genetic contributor').length;
+      const totalChildren = app.childHistory.length;
+      const avgHeight = totalChildren ? Math.round(app.childHistory.reduce((sum, child) => sum + child.genetic.heightCm, 0) / totalChildren) : 0;
+
+      const autismCount = app.childHistory.filter(c => c.complex.autism).length;
+      const adhdCount = app.childHistory.filter(c => c.complex.adhd).length;
+      const nbCount = app.childHistory.filter(c => c.complex.nonBinary).length;
+
+      familySummaryBody.innerHTML = `
+        <p><strong style="color:var(--text);">Current summary type:</strong> ${app.useGeneticContributors ? 'Contributing parents + genetic contributors' : 'Contributing parents'}</p>
+        <p><strong style="color:var(--text);">Total people created in this family:</strong> ${totalPeople}</p>
+        <p><strong style="color:var(--text);">Fathers created:</strong> ${totalFathersEver}</p>
+        <p><strong style="color:var(--text);">Mothers created:</strong> ${totalMothersEver}</p>
+        <p><strong style="color:var(--text);">Genetic contributors created:</strong> ${totalGeneticContributorsEver}</p>
+        <p><strong style="color:var(--text);">Total siblings created:</strong> ${totalChildren}</p>
+        <p><strong style="color:var(--text);">Average sibling height:</strong> ${totalChildren ? `${avgHeight} cm` : 'No siblings yet'}</p>
+        <ul>
+          <li>Autism present in siblings: ${autismCount}</li>
+          <li>ADHD present in siblings: ${adhdCount}</li>
+          <li>Non binary identity present in siblings: ${nbCount}</li>
+        </ul>
+        <p><strong style="color:var(--text);">All person letters used in this family:</strong> ${app.allPeopleEverCreated.map(p => p.letter).join(', ') || 'None yet'}</p>
+      `;
+    }
+
+    function renderAll() {
+      renderParents();
+      renderChildren();
+      renderFamilySummary();
+    }
+
+    function findPersonById(id) {
+      return app.allPeopleEverCreated.find(person => person.id === id);
+    }
+
+    function resetAll() {
+      app.parentLetterIndex = 0;
+      app.allPeopleEverCreated = [];
+      app.childHistory = [];
+      app.siblingCounter = 0;
+      app.father = null;
+      app.mother = null;
+      app.donorFather = null;
+      app.donorMother = null;
+      createBaseFamily();
+      renderAll();
+    }
+
+    function makeHuman() {
+      const child = buildChild();
+      app.childHistory.unshift(child);
+      renderAll();
+    }
+
+    const appActions = {
+      rerollGenetics(id) {
+        const person = findPersonById(id);
+        if (!person) return;
+        rerollPersonGenetics(person);
+        renderAll();
+      },
+
+      rerollSocial(id) {
+        const person = findPersonById(id);
+        if (!person) return;
+        rerollPersonSocial(person);
+        renderAll();
+      },
+
+      makeSiblingSameSetup() {
+        makeHuman();
+      },
+
+      makeSiblingNewMother() {
+        if (app.useGeneticContributors) {
+          let newParent;
+          const startIndex = app.parentLetterIndex;
+          const startPeopleCount = app.allPeopleEverCreated.length;
+          do {
+            app.parentLetterIndex = startIndex;
+            app.allPeopleEverCreated.length = startPeopleCount;
+            newParent = createPerson({
+              role: 'mother',
+              label: 'Raising Parent 2',
+              kind: 'Raising parent',
+              avatarHint: randomRaisingParentAvatarHint(),
+              gender: randomRaisingParentGender()
+            });
+            newParent.complex.sexuality = randomSexuality();
+          } while (!isCompatiblePair(app.father, newParent));
+          app.mother = newParent;
+        } else {
+          app.mother = createPerson({ role: 'mother', label: 'Mother', kind: 'Contributing parent', avatarHint: 'female', gender: 'Female' });
+          app.mother.complex.sexuality = choice(['Heterosexual', 'Bisexual']);
+        }
+        makeHuman();
+      },
+
+      makeSiblingNewFather() {
+        if (app.useGeneticContributors) {
+          let newParent;
+          const startIndex = app.parentLetterIndex;
+          const startPeopleCount = app.allPeopleEverCreated.length;
+          do {
+            app.parentLetterIndex = startIndex;
+            app.allPeopleEverCreated.length = startPeopleCount;
+            newParent = createPerson({
+              role: 'father',
+              label: 'Raising Parent 1',
+              kind: 'Raising parent',
+              avatarHint: randomRaisingParentAvatarHint(),
+              gender: randomRaisingParentGender()
+            });
+            newParent.complex.sexuality = randomSexuality();
+          } while (!isCompatiblePair(newParent, app.mother));
+          app.father = newParent;
+        } else {
+          app.father = createPerson({ role: 'father', label: 'Father', kind: 'Contributing parent', avatarHint: 'male', gender: 'Male' });
+          app.father.complex.sexuality = choice(['Heterosexual', 'Bisexual']);
+        }
+        makeHuman();
+      }
+    };
+
+    window.appActions = appActions;
+
+    geneticContributorToggle.addEventListener('change', (e) => {
+      app.useGeneticContributors = e.target.checked;
+      resetAll();
+    });
+
+    document.getElementById('makeHumanBtn').addEventListener('click', makeHuman);
+    document.getElementById('makeHumanBottomBtn').addEventListener('click', makeHuman);
+    document.getElementById('resetTopBtn').addEventListener('click', resetAll);
+    document.getElementById('resetBottomBtn').addEventListener('click', resetAll);
+
+    resetAll();
+  </script>
+</body>
+</html>
