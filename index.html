@@ -1364,8 +1364,12 @@
 
     function renderFamilySummary() {
       const totalPeople = app.allPeopleEverCreated.length;
-      const totalFathersEver = app.allPeopleEverCreated.filter(p => p.label === 'Father').length;
-      const totalMothersEver = app.allPeopleEverCreated.filter(p => p.label === 'Mother').length;
+      const totalFathersEver = app.useGeneticContributors
+        ? app.allPeopleEverCreated.filter(p => p.label === 'Raising Parent 1').length
+        : app.allPeopleEverCreated.filter(p => p.label === 'Father').length;
+      const totalMothersEver = app.useGeneticContributors
+        ? app.allPeopleEverCreated.filter(p => p.label === 'Raising Parent 2').length
+        : app.allPeopleEverCreated.filter(p => p.label === 'Mother').length;
       const totalGeneticContributorsEver = app.allPeopleEverCreated.filter(p => p.kind === 'Genetic contributor').length;
       const totalChildren = app.childHistory.length;
       const avgHeight = totalChildren ? Math.round(app.childHistory.reduce((sum, child) => sum + child.genetic.heightCm, 0) / totalChildren) : 0;
@@ -1377,8 +1381,8 @@
       familySummaryBody.innerHTML = `
         <p><strong style="color:var(--text);">Current summary type:</strong> ${app.useGeneticContributors ? 'Contributing parents + genetic contributors' : 'Contributing parents'}</p>
         <p><strong style="color:var(--text);">Total people created in this family:</strong> ${totalPeople}</p>
-        <p><strong style="color:var(--text);">Fathers created:</strong> ${totalFathersEver}</p>
-        <p><strong style="color:var(--text);">Mothers created:</strong> ${totalMothersEver}</p>
+        <p><strong style="color:var(--text);">${app.useGeneticContributors ? 'Raising parent 1 created:' : 'Fathers created:'}</strong> ${totalFathersEver}</p>
+        <p><strong style="color:var(--text);">${app.useGeneticContributors ? 'Raising parent 2 created:' : 'Mothers created:'}</strong> ${totalMothersEver}</p>
         <p><strong style="color:var(--text);">Genetic contributors created:</strong> ${totalGeneticContributorsEver}</p>
         <p><strong style="color:var(--text);">Total siblings created:</strong> ${totalChildren}</p>
         <p><strong style="color:var(--text);">Average sibling height:</strong> ${totalChildren ? `${avgHeight} cm` : 'No siblings yet'}</p>
